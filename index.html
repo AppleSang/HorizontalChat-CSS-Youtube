@@ -1,0 +1,2467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Horizontal Chat CSS Editor</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0f0f0f;
+      --surface: #1a1a1a;
+      --surface-2: #222;
+      --surface-3: #2a2a2a;
+      --border: rgba(255,255,255,0.06);
+      --border-hover: rgba(255,255,255,0.12);
+      --text: #e4e4e7;
+      --text-muted: #71717a;
+      --text-dim: #52525b;
+      --accent: #6366f1;
+      --accent-hover: #818cf8;
+      --accent-dim: rgba(99,102,241,0.15);
+      --green: #22c55e;
+      --orange: #f97316;
+      --red: #ef4444;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* ===== HEADER ===== */
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 20px;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+      background: var(--surface);
+    }
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .logo-icon {
+      width: 28px;
+      height: 28px;
+      background: linear-gradient(135deg, var(--accent), #a855f7);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+    }
+    .logo-text {
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: -0.3px;
+    }
+    .logo-text span { color: var(--text-muted); font-weight: 400; }
+    .header-badge {
+      font-size: 10px;
+      font-weight: 500;
+      padding: 2px 8px;
+      border-radius: 9999px;
+      background: var(--accent-dim);
+      color: var(--accent);
+      letter-spacing: 0.3px;
+    }
+    .header-actions {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+
+    /* ===== BUTTONS ===== */
+    .btn {
+      font-family: 'Inter', sans-serif;
+      font-size: 12px;
+      font-weight: 500;
+      padding: 6px 14px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--surface-2);
+      color: var(--text);
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn:hover { background: var(--surface-3); border-color: var(--border-hover); }
+    .btn-primary {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+    .btn-primary:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
+    .btn-sm { padding: 4px 10px; font-size: 11px; }
+    .btn svg { width: 14px; height: 14px; }
+
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: var(--green);
+      color: #fff;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 500;
+      opacity: 0;
+      transform: translateY(8px);
+      transition: all 0.2s ease;
+      pointer-events: none;
+      z-index: 999;
+    }
+    .toast.show { opacity: 1; transform: translateY(0); }
+
+    /* ===== COPY SUCCESS MODAL ===== */
+    .copy-modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+    }
+    .copy-modal-overlay.show { opacity: 1; pointer-events: auto; }
+    .copy-modal {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 24px;
+      width: 60%;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    }
+    .copy-modal-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 12px;
+    }
+    .copy-modal-title svg { width: 20px; height: 20px; color: var(--green); }
+    .copy-modal-desc {
+      font-size: 12px;
+      color: var(--text-muted);
+      line-height: 1.5;
+      margin-bottom: 16px;
+    }
+    .copy-modal-video {
+      width: 100%;
+      aspect-ratio: 16/9;
+      background: var(--surface-2);
+      border: 1px dashed var(--border);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-dim);
+      font-size: 12px;
+      margin-bottom: 16px;
+    }
+    .copy-modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+
+    /* ===== MAIN LAYOUT ===== */
+    .main {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    /* ===== LEFT PANEL (GUI + CODE) ===== */
+    .left-panel {
+      width: 440px;
+      min-width: 360px;
+      display: flex;
+      flex-direction: column;
+      border-right: 1px solid var(--border);
+      flex-shrink: 0;
+      background: var(--surface);
+    }
+
+    /* Tab bar */
+    .panel-tabs {
+      display: flex;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .panel-tab {
+      flex: 1;
+      padding: 10px 12px;
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text-muted);
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      font-family: 'Inter', sans-serif;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .panel-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+    .panel-tab:hover { color: var(--text); }
+
+    .panel-content {
+      flex: 1;
+      overflow: hidden;
+      position: relative;
+    }
+    .panel-pane {
+      display: none;
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      overflow-y: auto;
+    }
+    .panel-pane.active { display: flex; flex-direction: column; }
+    .panel-pane::-webkit-scrollbar { width: 5px; }
+    .panel-pane::-webkit-scrollbar-track { background: transparent; }
+    .panel-pane::-webkit-scrollbar-thumb { background: var(--surface-3); border-radius: 3px; }
+
+    /* ===== GUI SECTIONS ===== */
+    .gui-section {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    .gui-section:last-child { border-bottom: none; }
+    .gui-section-title {
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+    }
+
+    .gui-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+    .gui-row:last-child { margin-bottom: 0; }
+    .gui-label {
+      font-size: 12px;
+      color: var(--text);
+      font-weight: 400;
+      min-width: 90px;
+    }
+    .gui-label small {
+      display: block;
+      font-size: 12px;
+      color: var(--text);
+      margin-top: 1px;
+    }
+
+    .gui-control {
+      flex: 1;
+      max-width: 200px;
+    }
+
+    /* Select */
+    select.gui-select {
+      width: 100%;
+      font-family: 'Inter', sans-serif;
+      font-size: 12px;
+      background: var(--surface-2);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 6px 10px;
+      outline: none;
+      cursor: pointer;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%2371717a'%3E%3Cpath d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 8px center;
+    }
+    select.gui-select:focus { border-color: var(--accent); }
+
+    /* Range slider */
+    .gui-range-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    input[type="range"].gui-range {
+      flex: 1;
+      -webkit-appearance: none;
+      height: 4px;
+      background: var(--surface-3);
+      border-radius: 2px;
+      outline: none;
+    }
+    input[type="range"].gui-range::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 14px;
+      height: 14px;
+      background: var(--accent);
+      border-radius: 50%;
+      cursor: pointer;
+      border: 2px solid var(--surface);
+    }
+    .gui-range-val {
+      font-size: 11px;
+      color: var(--text-muted);
+      min-width: 32px;
+      text-align: right;
+      font-family: 'Geist Mono', monospace;
+    }
+
+    /* Color picker row */
+    .color-row {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .color-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+    .color-swatch {
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      border: 2px solid var(--surface-3);
+      cursor: pointer;
+      overflow: hidden;
+      position: relative;
+      transition: border-color 0.15s;
+    }
+    .color-swatch:hover { border-color: var(--accent); }
+    .color-swatch input[type="color"] {
+      position: absolute;
+      top: -4px;
+      left: -4px;
+      width: 40px;
+      height: 40px;
+      border: none;
+      cursor: pointer;
+    }
+    .color-label {
+      font-size: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-dim);
+      font-weight: 600;
+    }
+
+    /* Toggle */
+    .gui-toggle {
+      position: relative;
+      width: 36px;
+      height: 20px;
+      background: var(--surface-3);
+      border-radius: 10px;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      transition: background 0.2s;
+      flex-shrink: 0;
+    }
+    .gui-toggle.on { background: var(--accent); border-color: var(--accent); }
+    .gui-toggle::after {
+      content: '';
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 14px;
+      height: 14px;
+      background: #fff;
+      border-radius: 50%;
+      transition: transform 0.2s;
+    }
+    .gui-toggle.on::after { transform: translateX(16px); }
+
+    /* ===== CODE PANE ===== */
+    .code-pane {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+    .code-pane textarea {
+      flex: 1;
+      width: 100%;
+      min-height: 0;
+      background: var(--bg);
+      color: #a5b4fc;
+      border: none;
+      padding: 14px 16px;
+      font-family: 'Geist Mono', monospace;
+      font-size: 11.5px;
+      line-height: 1.7;
+      resize: none;
+      outline: none;
+      tab-size: 2;
+    }
+    .code-pane textarea::placeholder { color: var(--text-dim); }
+    .code-info {
+      padding: 6px 16px;
+      font-size: 10px;
+      color: var(--text-dim);
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      font-family: 'Geist Mono', monospace;
+    }
+
+    /* ===== RIGHT PANEL (PREVIEW) ===== */
+    .right-panel {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .preview-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 16px;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+      background: var(--surface);
+    }
+    .preview-toolbar-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .preview-label {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .preview-area {
+      flex: 1;
+      overflow: hidden;
+      position: relative;
+    }
+    .preview-bg {
+      width: 100%;
+      height: 100%;
+      background: #1a1a2e;
+      transition: background 0.3s ease;
+      display: flex;
+      align-items: flex-end;
+      position: relative;
+    }
+    .preview-bg.light { background: #f0f0f0; }
+    .preview-bg_checker {
+      position: absolute;
+      inset: 0;
+      opacity: 0.03;
+      background-image:
+        linear-gradient(45deg, #fff 25%, transparent 25%),
+        linear-gradient(-45deg, #fff 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, #fff 75%),
+        linear-gradient(-45deg, transparent 75%, #fff 75%);
+      background-size: 20px 20px;
+      background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+      pointer-events: none;
+    }
+
+    /* ===== CHAT PREVIEW ===== */
+    #chat-preview {
+      width: 100%;
+      height: 100%;
+      overflow-x: auto;
+      overflow-y: hidden;
+      display: flex;
+      flex-direction: row-reverse;
+      align-items: flex-end;
+      padding: 0 12px 10px 12px;
+      position: relative;
+      z-index: 1;
+    }
+    #chat-preview::-webkit-scrollbar { height: 4px; }
+    #chat-preview::-webkit-scrollbar-track { background: transparent; }
+    #chat-preview::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
+
+    /* ===== PREVIEW BUTTONS ===== */
+    .preview-btns {
+      display: flex;
+      gap: 4px;
+      padding: 6px 10px;
+      border-bottom: 1px solid var(--border);
+      flex-wrap: wrap;
+    }
+    .preview-btn {
+      font-family: 'Inter', sans-serif;
+      font-size: 10px;
+      font-weight: 500;
+      padding: 3px 8px;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+      background: var(--surface-2);
+      color: var(--text);
+      cursor: pointer;
+      transition: all 0.15s ease;
+      white-space: nowrap;
+    }
+    .preview-btn:hover { background: var(--surface-3); border-color: var(--border-hover); }
+    .preview-btn[data-type="viewer"] { border-color: #6b7280; }
+    .preview-btn[data-type="mod"] { border-color: #5541da; color: #a78bfa; }
+    .preview-btn[data-type="member"] { border-color: #41da93; color: #41da93; }
+    .preview-btn[data-type="owner"] { border-color: #dd5050; color: #dd5050; }
+    .preview-btn[data-type="superchat"] { border-color: #f97316; color: #f97316; }
+    .preview-btn[data-type="gift"] { border-color: #10b981; color: #10b981; }
+    .preview-btn[data-type="membership"] { border-color: #06b6d4; color: #06b6d4; }
+    .preview-btn-clear { border-color: #ef4444 !important; color: #ef4444 !important; margin-left: auto; }
+
+    /* Default chat item styles (before CSS overrides) */
+    yt-live-chat-text-message-renderer,
+    yt-live-chat-paid-message-renderer,
+    yt-live-chat-paid-sticker-renderer,
+    yt-live-chat-membership-item-renderer,
+    ytd-sponsorships-live-chat-gift-purchase-announcement-renderer {
+      display: flex;
+      flex-shrink: 0;
+      flex-direction: row;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 10px;
+      margin-right: 8px;
+      white-space: nowrap;
+    }
+    #author-photo {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+    #author-photo img {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+    #content {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 6px;
+    }
+    yt-live-chat-author-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    #author-name {
+      font-weight: 600;
+      font-size: 14px;
+      white-space: nowrap;
+    }
+    #message {
+      font-size: 14px;
+      white-space: nowrap;
+    }
+    #timestamp { display: none; }
+    #card {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 8px;
+    }
+    #header-content {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 8px;
+    }
+    #single-line {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 4px;
+    }
+    #purchase-amount {
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    #content-primary-column {
+      display: flex;
+      flex-direction: column;
+    }
+    #header-content-inner-column {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 6px;
+    }
+    #sticker-container {
+      width: 48px;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    #sticker-container img { max-width: 100%; max-height: 100%; }
+    #author-info {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 6px;
+    }
+    yt-live-chat-author-badge-renderer {
+      display: inline-flex;
+      align-items: center;
+    }
+    yt-live-chat-author-badge-renderer img,
+    yt-live-chat-author-badge-renderer svg {
+      width: 14px;
+      height: 14px;
+    }
+    #chat-preview * {
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    /* ===== FOOTER ===== */
+    .footer {
+      border-top: 1px solid var(--border);
+      padding: 10px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+      background: var(--surface);
+    }
+    .footer-credits {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .credit-item {
+      font-size: 10px;
+      color: var(--text-dim);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .credit-item a {
+      color: var(--text-muted);
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+    .credit-item a:hover { color: var(--accent); }
+    .credit-dot {
+      width: 3px;
+      height: 3px;
+      border-radius: 50%;
+      background: var(--text-dim);
+      flex-shrink: 0;
+    }
+    .footer-right {
+      font-size: 10px;
+      color: var(--text-dim);
+    }
+
+    /* ===== RESIZER ===== */
+    .resizer {
+      width: 3px;
+      cursor: col-resize;
+      background: transparent;
+      transition: background 0.15s;
+      flex-shrink: 0;
+    }
+    .resizer:hover, .resizer.active { background: var(--accent); }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-left">
+      <div class="logo">
+        <div class="logo-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        </div>
+        <div class="logo-text">HChat <span>Editor</span></div>
+      </div>
+      <div class="header-badge">LIVE</div>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-sm" id="btn-reset" title="Reset to default">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+        Reset
+      </button>
+      <button class="btn btn-sm" id="btn-export" title="Export CSS file">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Export
+      </button>
+      <button class="btn btn-primary btn-sm" id="btn-copy" title="Copy CSS to clipboard">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        Copy CSS
+      </button>
+    </div>
+  </div>
+
+  <div class="toast" id="toast">Copied to clipboard!</div>
+
+  <!-- MAIN -->
+  <div class="main">
+
+    <!-- LEFT PANEL -->
+    <div class="left-panel" id="left-panel">
+      <div class="panel-tabs">
+        <button class="panel-tab active" data-tab="gui">Editor</button>
+        <button class="panel-tab" data-tab="code">CSS Code</button>
+      </div>
+      <div class="panel-content">
+
+        <!-- GUI TAB -->
+        <div class="panel-pane active" id="pane-gui">
+
+          <!-- Typography: Name -->
+          <div class="gui-section">
+            <div class="gui-section-title">Name Typography</div>
+            <div class="gui-row">
+              <div class="gui-label">Font Family</div>
+              <div class="gui-control">
+                <select class="gui-select" id="gui-font-name">
+                  <option value="" selected>Default (Roboto)</option>
+                  <option value="Quicksand">Quicksand</option>
+                  <option value="Balsamiq Sans">Balsamiq Sans</option>
+                  <option value="Exo 2">Exo 2</option>
+                  <option value="Fredoka One">Fredoka One</option>
+                  <option value="Josefin Sans">Josefin Sans</option>
+                  <option value="Kanit">Kanit</option>
+                  <option value="Montserrat">Montserrat</option>
+                  <option value="Poppins">Poppins</option>
+                  <option value="Raleway">Raleway</option>
+                  <option value="Roboto">Roboto</option>
+                </select>
+              </div>
+            </div>
+            <div class="gui-row">
+              <div class="gui-label">Font Weight</div>
+              <div class="gui-control">
+                <select class="gui-select" id="gui-weight-name">
+                  <option value="400">Regular</option>
+                  <option value="500">Medium</option>
+                  <option value="600">Semi Bold</option>
+                  <option value="700" selected>Bold</option>
+                </select>
+              </div>
+            </div>
+            <div class="gui-row">
+              <div class="gui-label">Font Size</div>
+              <div class="gui-control">
+                <div class="gui-range-wrap">
+                  <input type="range" class="gui-range" id="gui-size-name" min="8" max="28" value="18">
+                  <span class="gui-range-val" id="val-size-name">18px</span>
+                </div>
+              </div>
+            </div>
+            <div class="gui-row">
+              <div class="gui-label"><small>Card Name Size</small></div>
+              <div class="gui-control">
+                <div class="gui-range-wrap">
+                  <input type="range" class="gui-range" id="gui-size-name-card" min="8" max="28" value="18">
+                  <span class="gui-range-val" id="val-size-name-card">18px</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Typography: Message -->
+          <div class="gui-section">
+            <div class="gui-section-title">Message Typography</div>
+            <div class="gui-row">
+              <div class="gui-label">Font Family</div>
+              <div class="gui-control">
+                <select class="gui-select" id="gui-font-msg">
+                  <option value="" selected>Default (Roboto)</option>
+          <option value="Quicksand">Quicksand</option>
+          <option value="Balsamiq Sans">Balsamiq Sans</option>
+          <option value="Exo 2">Exo 2</option>
+          <option value="Fredoka One">Fredoka One</option>
+          <option value="Josefin Sans">Josefin Sans</option>
+          <option value="Kanit">Kanit</option>
+          <option value="Montserrat">Montserrat</option>
+          <option value="Poppins">Poppins</option>
+          <option value="Raleway">Raleway</option>
+          <option value="Roboto">Roboto</option>
+                </select>
+              </div>
+            </div>
+            <div class="gui-row">
+              <div class="gui-label">Font Weight</div>
+              <div class="gui-control">
+                <select class="gui-select" id="gui-weight-msg">
+                  <option value="400" selected>Regular</option>
+                  <option value="500">Medium</option>
+          <option value="600">Semi Bold</option>
+          <option value="700">Bold</option>
+                </select>
+              </div>
+            </div>
+            <div class="gui-row">
+              <div class="gui-label">Font Size</div>
+              <div class="gui-control">
+                <div class="gui-range-wrap">
+                  <input type="range" class="gui-range" id="gui-size-msg" min="8" max="38" value="22">
+                  <span class="gui-range-val" id="val-size-msg">22px</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Colors: Name -->
+          <div class="gui-section">
+            <div class="gui-section-title">Name Colors</div>
+            <div class="color-row">
+              <div class="color-item">
+                <div class="color-swatch"><input type="color" id="clr-name" value="#9a8484"></div>
+                <div class="color-label">Default</div>
+              </div>
+              <div class="color-item">
+                <div class="color-swatch"><input type="color" id="clr-name-mod" value="#5541da"></div>
+                <div class="color-label">Mod</div>
+              </div>
+              <div class="color-item">
+                <div class="color-swatch"><input type="color" id="clr-name-mem" value="#41da93"></div>
+                <div class="color-label">Member</div>
+              </div>
+              <div class="color-item">
+                <div class="color-swatch"><input type="color" id="clr-name-own" value="#dd5050"></div>
+                <div class="color-label">Owner</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Colors: Message -->
+          <div class="gui-section">
+            <div class="gui-section-title">Message Colors</div>
+            <div class="color-row">
+              <div class="color-item">
+                <div class="color-swatch"><input type="color" id="clr-msg" value="#ffffff"></div>
+                <div class="color-label">Default</div>
+              </div>
+              <div class="color-item">
+                <div class="color-swatch"><input type="color" id="clr-msg-mod" value="#ffffff"></div>
+                <div class="color-label">Mod</div>
+              </div>
+              <div class="color-item">
+                <div class="color-swatch"><input type="color" id="clr-msg-mem" value="#ffffff"></div>
+                <div class="color-label">Member</div>
+              </div>
+              <div class="color-item">
+                <div class="color-swatch"><input type="color" id="clr-msg-own" value="#ffffff"></div>
+                <div class="color-label">Owner</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Outline -->
+          <div class="gui-section">
+            <div class="gui-section-title">Text Outline</div>
+            <div class="gui-row">
+              <div class="gui-label">Enable Outline</div>
+              <div class="gui-control" style="max-width:none">
+                <div class="gui-toggle on" id="gui-outline-toggle"></div>
+              </div>
+            </div>
+            <div class="gui-row">
+              <div class="gui-label">Outline Color</div>
+              <div class="gui-control" style="max-width:none">
+                <div class="color-swatch"><input type="color" id="clr-outline" value="#000000"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Glow -->
+          <div class="gui-section">
+            <div class="gui-section-title">Glow / Aura</div>
+            <div class="gui-row">
+              <div class="gui-label">Glow Color</div>
+              <div class="gui-control" style="max-width:none">
+                <div class="color-swatch"><input type="color" id="clr-glow" value="#000000"></div>
+              </div>
+            </div>
+            <div class="gui-row">
+              <div class="gui-label"><small>Glow Opacity</small></div>
+              <div class="gui-control">
+                <div class="gui-range-wrap">
+                  <input type="range" class="gui-range" id="gui-glow-opacity" min="0" max="100" value="0">
+                  <span class="gui-range-val" id="val-glow-opacity">0%</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Timestamps -->
+          <div class="gui-section">
+            <div class="gui-section-title">Timestamps</div>
+            <div class="gui-row">
+              <div class="gui-label">Show Timestamps</div>
+              <div class="gui-control" style="max-width:none">
+                <div class="gui-toggle" id="gui-show-timestamps"></div>
+              </div>
+            </div>
+            <div class="gui-row">
+              <div class="gui-label">Timestamp Color</div>
+              <div class="gui-control" style="max-width:none">
+                <div class="color-swatch"><input type="color" id="clr-timestamp" value="#999999"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Text Options -->
+          <div class="gui-section">
+            <div class="gui-section-title">Text Options</div>
+            <div class="gui-row">
+              <div class="gui-label">Show Avatars</div>
+              <div class="gui-control" style="max-width:none">
+                <div class="gui-toggle on" id="gui-show-avatars"></div>
+              </div>
+            </div>
+            <div class="gui-row">
+              <div class="gui-label">Letter Spacing</div>
+              <div class="gui-control">
+                <div class="gui-range-wrap">
+                  <input type="range" class="gui-range" id="gui-letter-spacing" min="-2" max="4" value="0" step="0.5">
+                  <span class="gui-range-val" id="val-letter-spacing">0px</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Message Backgrounds -->
+          <div class="gui-section">
+            <div class="gui-section-title">Message Backgrounds</div>
+            <div class="gui-row">
+              <div class="gui-label">Message BG</div>
+              <div class="gui-control" style="max-width:none">
+                <div class="color-swatch"><input type="color" id="clr-msg-bg" value="#000000"></div>
+                <div class="gui-range-wrap" style="display:inline-flex;vertical-align:middle;margin-left:8px;max-width:100px">
+                  <input type="range" class="gui-range" id="gui-msg-bg-opacity" min="0" max="100" value="0">
+                  <span class="gui-range-val" id="val-msg-bg-opacity">0%</span>
+                </div>
+              </div>
+            </div>
+            <div class="gui-row">
+              <div class="gui-label"><small>Owner BG</small></div>
+              <div class="gui-control" style="max-width:none">
+                <div class="color-swatch"><input type="color" id="clr-owner-bg" value="#ffd600"></div>
+                <div class="gui-range-wrap" style="display:inline-flex;vertical-align:middle;margin-left:8px;max-width:100px">
+                  <input type="range" class="gui-range" id="gui-owner-bg-opacity" min="0" max="100" value="0">
+                  <span class="gui-range-val" id="val-owner-bg-opacity">0%</span>
+                </div>
+              </div>
+            </div>
+            <div class="gui-row">
+              <div class="gui-label"><small>Mod BG</small></div>
+              <div class="gui-control" style="max-width:none">
+                <div class="color-swatch"><input type="color" id="clr-mod-bg" value="#5e84f1"></div>
+                <div class="gui-range-wrap" style="display:inline-flex;vertical-align:middle;margin-left:8px;max-width:100px">
+                  <input type="range" class="gui-range" id="gui-mod-bg-opacity" min="0" max="100" value="0">
+                  <span class="gui-range-val" id="val-mod-bg-opacity">0%</span>
+                </div>
+              </div>
+            </div>
+            <div class="gui-row">
+              <div class="gui-label"><small>Member BG</small></div>
+              <div class="gui-control" style="max-width:none">
+                <div class="color-swatch"><input type="color" id="clr-member-bg" value="#0f9d58"></div>
+                <div class="gui-range-wrap" style="display:inline-flex;vertical-align:middle;margin-left:8px;max-width:100px">
+                  <input type="range" class="gui-range" id="gui-member-bg-opacity" min="0" max="100" value="0">
+                  <span class="gui-range-val" id="val-member-bg-opacity">0%</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Layout -->
+          <div class="gui-section">
+            <div class="gui-section-title">Layout</div>
+            <div class="gui-row">
+              <div class="gui-label">Avatar Size</div>
+              <div class="gui-control">
+                <div class="gui-range-wrap">
+                  <input type="range" class="gui-range" id="gui-avatar-size" min="12" max="40" value="24">
+                  <span class="gui-range-val" id="val-avatar-size">24px</span>
+                </div>
+              </div>
+            </div>
+            <div class="gui-row">
+              <div class="gui-label">Border Radius</div>
+              <div class="gui-control">
+                <div class="gui-range-wrap">
+                  <input type="range" class="gui-range" id="gui-radius" min="0" max="24" value="12">
+                  <span class="gui-range-val" id="val-radius">12px</span>
+                </div>
+              </div>
+            </div>
+            <div class="gui-row">
+              <div class="gui-label">Message Spacing</div>
+              <div class="gui-control">
+                <div class="gui-range-wrap">
+                  <input type="range" class="gui-range" id="gui-msg-spacing" min="0" max="16" value="3">
+                  <span class="gui-range-val" id="val-msg-spacing">3px</span>
+                </div>
+              </div>
+            </div>
+            <div class="gui-row">
+              <div class="gui-label">Chat BG</div>
+              <div class="gui-control" style="max-width:none">
+                <div class="color-swatch"><input type="color" id="clr-chat-bg" value="#000000"></div>
+                <span style="font-size:10px;color:var(--text-dim);margin-left:6px">Transparent by default (set alpha in CSS)</span>
+              </div>
+            </div>
+            <div class="gui-row">
+              <div class="gui-label">Hide Top Chat Badge</div>
+              <div class="gui-control" style="max-width:none">
+                <div class="gui-toggle on" id="gui-hide-badges"></div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- CODE TAB -->
+        <div class="panel-pane" id="pane-code">
+          <div class="code-pane">
+            <textarea id="css-editor" spellcheck="false" placeholder="CSS code will appear here..."></textarea>
+            <div class="code-info">
+              <span id="line-count">0 lines</span>
+              <span id="char-count">0 chars</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- HTML TAB -->
+        <div class="panel-pane" id="pane-html">
+          <div class="code-pane">
+            <textarea id="html-editor" spellcheck="false" placeholder="Edit chat HTML..."></textarea>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="resizer" id="resizer"></div>
+
+    <!-- RIGHT PANEL -->
+    <div class="right-panel">
+      <div class="preview-toolbar">
+        <div class="preview-toolbar-left">
+          <span class="preview-label">Preview</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px">
+          <label style="font-size:11px;color:var(--text-muted);display:flex;align-items:center;gap:6px;cursor:pointer">
+            BG
+            <div class="gui-toggle" id="bg-toggle"></div>
+          </label>
+          <label style="font-size:11px;color:var(--text-muted);display:flex;align-items:center;gap:6px">
+            Zoom
+            <select class="gui-select" id="zoom-select" style="width:60px;padding:3px 24px 3px 6px">
+              <option value="0.5">50%</option>
+              <option value="0.6">60%</option>
+              <option value="0.7">70%</option>
+              <option value="0.8" selected>80%</option>
+              <option value="0.9">90%</option>
+              <option value="1">100%</option>
+            </select>
+          </label>
+        </div>
+      </div>
+      <div class="preview-btns" id="preview-btns">
+        <button class="preview-btn" data-type="viewer" title="Add viewer message">Viewer</button>
+        <button class="preview-btn" data-type="mod" title="Add moderator message">Mod</button>
+        <button class="preview-btn" data-type="member" title="Add member message">Member</button>
+        <button class="preview-btn" data-type="owner" title="Add owner message">Owner</button>
+        <button class="preview-btn" data-type="superchat" title="Add super chat">Super Chat</button>
+        <button class="preview-btn" data-type="gift" title="Add gifted membership">Gift</button>
+        <button class="preview-btn" data-type="membership" title="Add new membership">Join</button>
+        <button class="preview-btn preview-btn-clear" id="btn-clear-preview" title="Clear preview">Clear</button>
+      </div>
+      <div class="preview-area">
+        <div class="preview-bg" id="preview-bg">
+          <div class="preview-bg_checker"></div>
+          <div id="chat-preview"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- COPY SUCCESS MODAL -->
+  <div class="copy-modal-overlay" id="copy-modal">
+    <div class="copy-modal">
+      <div class="copy-modal-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        CSS Copied Successfully!
+      </div>
+      <div class="copy-modal-desc">
+        Your horizontal chat CSS has been copied to clipboard. Paste it into OBS Browser Source Custom CSS field.
+      </div>
+      <div class="copy-modal-video" id="copy-modal-video">
+        Video preview will be added here
+      </div>
+      <div class="copy-modal-actions">
+        <button class="btn btn-sm" id="copy-modal-close">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    <div class="footer-credits">
+      <div class="credit-item">
+        <span>CSS by</span>
+        <a href="https://github.com/Zaladin5x" target="_blank" rel="noopener">Zaladin5x</a>
+      </div>
+      <div class="credit-dot"></div>
+      <div class="credit-item">
+        <span>Editor concept by</span>
+        <a href="https://ko-fi.com/s/c1037bb627" target="_blank" rel="noopener">Touru Baskara (TouruWorks)</a>
+      </div>
+      <div class="credit-dot"></div>
+      <div class="credit-item">
+        <span>Chat data by</span>
+        <a href="https://github.com/dekreza" target="_blank" rel="noopener">Reza (DekReza)</a>
+      </div>
+      <div class="credit-dot"></div>
+      <div class="credit-item">
+        <span>Features inspired by</span>
+        <a href="https://chatv2.septapus.com/" target="_blank" rel="noopener">Septapus (Chat V2)</a>
+      </div>
+    </div>
+    <div class="footer-right">Horizontal Chat Editor v2.0</div>
+  </div>
+
+  <!-- LIVE STYLE INJECTION -->
+  <style id="live-css"></style>
+
+  <script>
+    // ========================================
+    // DEFAULT CSS TEMPLATE
+    // ========================================
+    function generateCSS(cfg) {
+      const hexToRgba = (hex, a) => {
+        const r = parseInt(hex.slice(1,3),16);
+        const g = parseInt(hex.slice(3,5),16);
+        const b = parseInt(hex.slice(5,7),16);
+        return `rgba(${r},${g},${b},${a})`;
+      };
+
+      const outlineShadow = cfg.outlineEnabled
+        ? `text-shadow: -2px -2px ${cfg.outlineColor},-2px -1px ${cfg.outlineColor},-2px 0px ${cfg.outlineColor},-2px 1px ${cfg.outlineColor},-2px 2px ${cfg.outlineColor},-1px -2px ${cfg.outlineColor},-1px -1px ${cfg.outlineColor},-1px 0px ${cfg.outlineColor},-1px 1px ${cfg.outlineColor},-1px 2px ${cfg.outlineColor},0px -2px ${cfg.outlineColor},0px -1px ${cfg.outlineColor},0px 0px ${cfg.outlineColor},0px 1px ${cfg.outlineColor},0px 2px ${cfg.outlineColor},1px -2px ${cfg.outlineColor},1px -1px ${cfg.outlineColor},1px 0px ${cfg.outlineColor},1px 1px ${cfg.outlineColor},1px 2px ${cfg.outlineColor},2px -2px ${cfg.outlineColor},2px -1px ${cfg.outlineColor},2px 0px ${cfg.outlineColor},2px 1px ${cfg.outlineColor},2px 2px ${cfg.outlineColor} !important;`
+        : '';
+
+      const glowR = parseInt(cfg.glowColor.slice(1,3),16);
+      const glowG = parseInt(cfg.glowColor.slice(3,5),16);
+      const glowB = parseInt(cfg.glowColor.slice(5,7),16);
+      const glowA = cfg.glowOpacity / 100;
+      const glowFilter = glowA > 0
+        ? `filter: drop-shadow(0 0 6px rgba(${glowR},${glowG},${glowB},${glowA})) drop-shadow(0 0 3px rgba(${glowR},${glowG},${glowB},${glowA}));`
+        : '';
+      const glowTextShadow = glowA > 0 && !cfg.outlineEnabled
+        ? `text-shadow: 0 0 8px rgba(${glowR},${glowG},${glowB},${glowA}), 0 0 8px rgba(${glowR},${glowG},${glowB},${glowA});`
+        : '';
+
+      const ownerBg = hexToRgba(cfg.clrNameOwn, 1);
+      const chatBg = hexToRgba(cfg.chatBg, 0);
+
+      const fontImports = [];
+      if (cfg.fontName) fontImports.push(`family=${cfg.fontName.replace(/ /g,'+')}:wght@400;700`);
+      if (cfg.fontMsg && cfg.fontMsg !== cfg.fontName) fontImports.push(`family=${cfg.fontMsg.replace(/ /g,'+')}:wght@400;700`);
+      const fontImport = fontImports.length
+        ? `@import url('https://fonts.googleapis.com/css2?${fontImports.join('&')}&display=swap');`
+        : '';
+
+      const nameFontFamily = cfg.fontName ? `'${cfg.fontName}', Roboto, Arial, sans-serif` : 'Roboto, Arial, sans-serif';
+      const msgFontFamily = cfg.fontMsg ? `'${cfg.fontMsg}', Roboto, Arial, sans-serif` : 'Roboto, Arial, sans-serif';
+
+      return `/*
+ * Horizontal YouTube Chat CSS - Generated by HChat Editor
+ *
+ * Credits:
+ *   Zaladin5x       - Base horizontal chat CSS layout
+ *   Touru Baskara    - Editor concept & GUI design
+ *   Septapus         - Chat V2 style generator (inspiration for customization features)
+ *   Reza (DekReza)   - Chat HTML data & rendering logic
+ *
+ * Sources:
+ *   https://github.com/Zaladin5x
+ *   https://ko-fi.com/s/c1037bb627
+ *   https://chatv2.septapus.com/
+ *   https://github.com/dekreza
+ */
+
+${fontImport}
+
+:root {
+  --main-font: ${nameFontFamily};
+  --msg-font: ${msgFontFamily};
+  --chat-bg: ${chatBg};
+  --text-color-massagebox: ${cfg.clrName};
+  --text-color-owner-name: #ffffff;
+  --text-color-owner-name-bg: ${cfg.clrNameOwn};
+  --text-color-moderator: ${cfg.clrNameMod};
+  --text-color-member: ${cfg.clrNameMem};
+  --text-color-message: ${cfg.clrMsg};
+  --text-color-message-moderator: ${cfg.clrMsgMod};
+  --text-color-message-member: ${cfg.clrMsgMem};
+  --text-color-message-owner: ${cfg.clrMsgOwn};
+  --chat-border-radius: ${cfg.radius}px;
+  --chat-padding: 8px 8px;
+  --chat-font-size-name: ${cfg.sizeName}px;
+  --chat-font-size-message: ${cfg.sizeMsg}px;
+  --wrap-mode: normal;
+  --word-break-mode: break-word;
+  --chat-max-width: 600px;
+  --chat-line-height: 1.4;
+}
+
+/* === GLOBAL RESET === */
+html, body, yt-live-chat-app, yt-live-chat-item-list-renderer,
+#item-scroller, #item-list, #items {
+  font-family: var(--main-font) !important;
+  background: transparent !important;
+  border: none !important;
+  margin: 0 !important;
+  height: 100% !important;
+  max-height: 100vh !important;
+  overflow: hidden !important;
+}
+yt-live-chat-renderer,
+#chat, #chat-messages {
+  background: transparent !important;
+  border: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* === HIDE YOUTUBE UI === */
+yt-live-chat-header-renderer, yt-live-chat-message-input-renderer,
+yt-live-chat-placeholder-item-renderer, yt-live-chat-poll-renderer,
+yt-live-chat-banner-renderer, #header-entrypoint, #input-panel,
+#separator, #divider,
+yt-live-chat-viewer-engagement-message-renderer,
+#ticker-bar, yt-live-chat-pinned-message-renderer,
+yt-live-chat-banner-manager, yt-live-chat-gift-membership-entry-point-renderer,
+yt-live-chat-paid-message-renderer #footer,
+yt-live-chat-paid-message-renderer #menu,
+yt-live-chat-paid-message-renderer #reply-button,
+yt-live-chat-paid-message-renderer #footer button,
+div#separator {
+  display: none !important;
+}
+
+/* === HORIZONTAL LAYOUT === */
+#items, #item-offset { height: 100vh; }
+#item-offset {
+  min-height: 100vh !important;
+  max-height: 100vh !important;
+}
+#item-scroller #items {
+  overflow: visible !important;
+  display: flex !important;
+  flex-wrap: nowrap !important;
+  left: auto !important;
+  right: 0;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  width: 100% !important;
+  height: 100% !important;
+  padding: 0 10px 8px 10px !important;
+  box-sizing: border-box !important;
+  gap: ${cfg.msgSpacing}px !important;
+}
+
+/* === GLOBAL: Force all items single-line centered === */
+yt-live-chat-text-message-renderer,
+yt-live-chat-paid-message-renderer,
+yt-live-chat-membership-item-renderer,
+yt-live-chat-paid-sticker-renderer,
+ytd-sponsorships-live-chat-gift-purchase-announcement-renderer {
+  display: inline-flex !important;
+  flex-direction: row !important;
+  align-items: flex-end !important;
+  vertical-align: middle !important;
+  height: auto !important;
+  max-height: none !important;
+  min-height: 0 !important;
+  line-height: 1 !important;
+  flex-shrink: 0 !important;
+  margin-right: 0px !important;
+  overflow: visible !important;
+  contain: none !important;
+  padding: 4px 0 !important;
+  animation: slidein 440ms ease, fadein 500ms ease;
+}
+
+/* === AVATAR === */
+yt-live-chat-text-message-renderer #author-photo,
+yt-live-chat-paid-message-renderer #author-photo,
+yt-live-chat-membership-item-renderer #author-photo,
+yt-live-chat-paid-sticker-renderer #author-photo {
+  display: inline-flex !important;
+  width: ${cfg.avatarSize}px !important;
+  height: ${cfg.avatarSize}px !important;
+  min-width: ${cfg.avatarSize}px !important;
+  min-height: ${cfg.avatarSize}px !important;
+  border-radius: 50% !important;
+  overflow: hidden !important;
+  margin-right: 5px !important;
+  flex-shrink: 0 !important;
+  align-self: center !important;
+}
+yt-live-chat-text-message-renderer #author-photo img,
+yt-live-chat-paid-message-renderer #author-photo img,
+yt-live-chat-membership-item-renderer #author-photo img,
+yt-live-chat-paid-sticker-renderer #author-photo img {
+  width: ${cfg.avatarSize}px !important;
+  height: ${cfg.avatarSize}px !important;
+  display: block !important;
+  vertical-align: middle !important;
+}
+
+/* === NORMAL CHAT === */
+yt-live-chat-text-message-renderer {
+  background-color: var(--chat-bg) !important;
+  border-radius: var(--chat-border-radius) !important;
+  padding: 4px 10px !important;
+  margin-bottom: 0 !important;
+  gap: 1px;
+}
+
+/* Author chip: name + badge inline */
+yt-live-chat-author-chip {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 1px !important;
+  width: auto !important;
+  white-space: nowrap !important;
+  line-height: 1 !important;
+  vertical-align: middle !important;
+  flex-shrink: 0 !important;
+}
+
+yt-live-chat-author-chip #chat-badges {
+  margin-left: 1px !important;
+}
+
+
+
+/* Name */
+yt-live-chat-text-message-renderer #author-name,
+yt-live-chat-text-message-renderer #before-content-buttons {
+  padding: 0 !important;
+  margin: 0 !important;
+  width: auto !important;
+  font-size: var(--chat-font-size-message) !important;
+  font-weight: bold !important;
+  color: var(--text-color-massagebox) !important;
+  ${glowFilter ? glowFilter : ''}
+  ${outlineShadow || glowTextShadow}
+  white-space: nowrap !important;
+  line-height: 1 !important;
+  display: inline !important;
+  vertical-align: middle !important;
+}
+
+/* Moderator badge icon */
+yt-live-chat-author-badge-renderer {
+  padding: 0 !important;
+  margin-left: 1px !important;
+  margin-right: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  line-height: 1 !important;
+  vertical-align: middle !important;
+  flex-shrink: 0 !important;
+}
+yt-live-chat-author-badge-renderer img,
+yt-live-chat-author-badge-renderer svg {
+  width: 14px !important;
+  height: 14px !important;
+  vertical-align: middle !important;
+}
+
+/* Message text */
+yt-live-chat-text-message-renderer #content,
+yt-live-chat-text-message-renderer #content > * {
+  display: inline-flex !important;
+  align-items: center !important;
+  vertical-align: middle !important;
+}
+yt-live-chat-text-message-renderer #message {
+  display: inline !important;
+  color: var(--text-color-message) !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  font-size: var(--chat-font-size-message) !important;
+  word-break: var(--word-break-mode) !important;
+  line-height: 1 !important;
+  letter-spacing: ${cfg.letterSpacing}px !important;
+  max-width: var(--chat-max-width) !important;
+  ${glowFilter ? glowFilter : ''}
+  ${outlineShadow || glowTextShadow}
+  vertical-align: middle !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  max-width: 6000px !important;
+
+}
+
+/* Content wrapper */
+yt-live-chat-text-message-renderer #content,
+yt-live-chat-paid-message-renderer #content {
+  display: inline-flex !important;
+  align-items: center !important;
+  vertical-align: middle !important;
+  line-height: 1 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  gap: 1px !important;
+}
+
+/* Hide top chat badges */
+${cfg.hideBadges ? `yt-live-chat-author-chip #chip-badges,
+yt-live-chat-text-message-renderer button-view-model {
+  display: none !important;
+}` : ''}
+
+/* Timestamps */
+${cfg.showTimestamps ? `
+yt-live-chat-text-message-renderer #timestamp {
+  display: inline !important;
+  color: ${cfg.timestampColor} !important;
+  font-size: var(--chat-font-size-message) !important;
+  margin-right: 5px !important;
+}` : `
+yt-live-chat-text-message-renderer #timestamp,
+yt-live-chat-text-message-renderer #timestamp.yt-live-chat-text-message-renderer,
+yt-live-chat-paid-message-renderer #timestamp,
+yt-live-chat-membership-item-renderer #timestamp,
+yt-live-chat-paid-sticker-renderer #timestamp,
+span#timestamp,
+[timestamp] {
+  display: none !important;
+  visibility: hidden !important;
+  width: 0 !important;
+  height: 0 !important;
+  overflow: hidden !important;
+  position: absolute !important;
+}`}
+
+
+
+
+/* Show/Hide avatars */
+${!cfg.showAvatars ? `
+yt-live-chat-text-message-renderer #author-photo,
+yt-live-chat-paid-message-renderer #author-photo,
+yt-live-chat-membership-item-renderer #author-photo,
+yt-live-chat-paid-sticker-renderer #author-photo {
+  display: none !important;
+}` : ''}
+
+/* Message backgrounds */
+${cfg.msgBgOpacity > 0 ? `
+yt-live-chat-text-message-renderer {
+  background-color: ${hexToRgba(cfg.msgBgColor, cfg.msgBgOpacity / 100)} !important;
+}` : ''}
+${cfg.ownerBgOpacity > 0 ? `
+yt-live-chat-text-message-renderer[author-type="owner"],
+yt-live-chat-text-message-renderer[author-is-owner] {
+  background-color: ${hexToRgba(cfg.ownerBgColor, cfg.ownerBgOpacity / 100)} !important;
+}` : ''}
+${cfg.modBgOpacity > 0 ? `
+yt-live-chat-text-message-renderer[author-type="moderator"] {
+  background-color: ${hexToRgba(cfg.modBgColor, cfg.modBgOpacity / 100)} !important;
+}` : ''}
+${cfg.memberBgOpacity > 0 ? `
+yt-live-chat-text-message-renderer[author-type="member"] {
+  background-color: ${hexToRgba(cfg.memberBgColor, cfg.memberBgOpacity / 100)} !important;
+}` : ''}
+
+/* === OWNER === */
+yt-live-chat-text-message-renderer #author-name.owner {
+  background-color: var(--text-color-owner-name-bg) !important;
+  color: var(--text-color-owner-name) !important;
+  ${glowFilter ? glowFilter : ''}
+  text-shadow: none !important;
+  font-size: var(--chat-font-size-message) !important;
+  padding: 2px 6px !important;
+  border-radius: 4px;
+  line-height: 1 !important;
+}
+
+/* === MODERATOR === */
+yt-live-chat-text-message-renderer[author-type="moderator"] #author-name {
+  color: var(--text-color-moderator) !important;
+}
+yt-live-chat-text-message-renderer[author-type="moderator"] #message {
+  color: var(--text-color-message-moderator) !important;
+}
+
+/* === MEMBER === */
+yt-live-chat-text-message-renderer[author-type="member"] #author-name {
+  color: var(--text-color-member) !important;
+}
+yt-live-chat-text-message-renderer[author-type="member"] #message {
+  color: var(--text-color-message-member) !important;
+}
+
+/* === OWNER === */
+yt-live-chat-text-message-renderer #author-name.owner,
+yt-live-chat-text-message-renderer[author-type="owner"] #author-name {
+  color: var(--text-color-owner-name) !important;
+}
+yt-live-chat-text-message-renderer[author-type="owner"] #message,
+yt-live-chat-text-message-renderer[author-is-owner] #message {
+  color: var(--text-color-message-owner) !important;
+}
+
+/* === HIDE DELETED === */
+yt-live-chat-text-message-renderer[is-deleted],
+yt-live-chat-paid-message-renderer[is-deleted],
+yt-live-chat-paid-sticker-renderer[is-deleted],
+yt-live-chat-membership-item-renderer[is-deleted] {
+  display: none !important;
+}
+
+/* === MEMBERSHIP === */
+yt-live-chat-membership-item-renderer {
+  background: linear-gradient(135deg, rgba(16,185,129,0.25) 0%, rgba(16,185,129,0.15) 100%) !important;
+  border-radius: var(--chat-border-radius) !important;
+  padding: 4px 10px !important;
+  font-size: var(--chat-font-size-message) !important;
+  ${glowFilter ? glowFilter : ''}
+  ${outlineShadow || glowTextShadow}
+  gap: 1px;
+}
+yt-live-chat-membership-item-renderer #card,
+yt-live-chat-membership-item-renderer #header-content,
+yt-live-chat-membership-item-renderer #header-content-inner-column,
+yt-live-chat-membership-item-renderer #message-and-author-chip {
+  display: inline-flex !important;
+  align-items: center !important;
+  vertical-align: middle !important;
+  line-height: 1 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  gap: 1px !important;
+  filter: none !important;
+  text-shadow: none !important;
+  white-space: nowrap !important;
+}
+yt-live-chat-membership-item-renderer #author-name {
+  font-size: var(--chat-font-size-message) !important;
+  line-height: 1 !important;
+  vertical-align: middle !important;
+}
+
+/* === SUPER CHAT === */
+yt-live-chat-paid-message-renderer {
+  border-radius: var(--chat-border-radius) !important;
+  padding: 4px 10px !important;
+  ${glowFilter ? glowFilter : ''}
+  ${outlineShadow || glowTextShadow}
+  gap: 1px;
+}
+yt-live-chat-paid-message-renderer #card {
+  display: inline-flex !important;
+  align-items: center !important;
+  vertical-align: middle !important;
+  gap: 1px !important;
+  box-shadow: none !important;
+  filter: none !important;
+  text-shadow: none !important;
+  line-height: 1 !important;
+  position: relative !important;
+}
+yt-live-chat-paid-message-renderer #header,
+yt-live-chat-paid-message-renderer #header-content,
+yt-live-chat-paid-message-renderer #single-line,
+yt-live-chat-paid-message-renderer #header-content-primary-column {
+  display: inline-flex !important;
+  align-items: center !important;
+  vertical-align: middle !important;
+  line-height: 1 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  gap: 1px !important;
+}
+yt-live-chat-paid-message-renderer #author-chip {
+  display: inline-flex !important;
+  width: auto !important;
+  align-items: center !important;
+  line-height: 1 !important;
+}
+yt-live-chat-paid-message-renderer #content {
+  display: inline-flex !important;
+  align-items: center !important;
+  margin: 0 !important;
+  font-size: var(--chat-font-size-message) !important;
+  white-space: nowrap !important;
+  gap: 1px !important;
+  line-height: 1 !important;
+}
+yt-live-chat-paid-message-renderer #author-name {
+  font-size: ${cfg.sizeNameCard}px !important;
+  line-height: 1 !important;
+}
+
+/* === SUPER STICKER === */
+yt-live-chat-paid-sticker-renderer {
+  border-radius: var(--chat-border-radius) !important;
+  padding: 4px 10px !important;
+  ${glowFilter ? glowFilter : ''}
+  ${outlineShadow || glowTextShadow}
+  white-space: nowrap !important;
+  gap: 1px;
+}
+yt-live-chat-paid-sticker-renderer #card {
+  display: inline-flex !important;
+  align-items: center !important;
+  vertical-align: middle !important;
+  line-height: 1 !important;
+  gap: 1px !important;
+}
+yt-live-chat-paid-sticker-renderer #author-chip {
+  display: inline-flex !important;
+  width: auto !important;
+  align-items: center !important;
+  font-size: ${cfg.sizeNameCard}px !important;
+  line-height: 1 !important;
+}
+yt-live-chat-paid-sticker-renderer #content,
+yt-live-chat-paid-sticker-renderer #content > * {
+  display: inline-flex !important;
+  align-items: center !important;
+  vertical-align: middle !important;
+  filter: none !important;
+  text-shadow: none !important;
+  font-size: var(--chat-font-size-message) !important;
+  line-height: 1 !important;
+}
+
+/* === GIFT === */
+ytd-sponsorships-live-chat-gift-purchase-announcement-renderer {
+  display: inline-flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  gap: 1px;
+  box-shadow: none !important;
+  background: linear-gradient(135deg, rgba(16,185,129,0.35) 0%, rgba(6,182,212,0.35) 100%) !important;
+  border-radius: var(--chat-border-radius) !important;
+  padding: 4px 10px !important;
+  ${glowFilter ? glowFilter : ''}
+  ${outlineShadow || glowTextShadow}
+  flex-shrink: 0 !important;
+  margin-right: 3px !important;
+  overflow: visible !important;
+  line-height: 1 !important;
+}
+ytd-sponsorships-live-chat-header-renderer,
+ytd-sponsorships-live-chat-header-renderer #header,
+ytd-sponsorships-live-chat-header-renderer #content {
+  display: inline-flex !important;
+  align-items: center !important;
+  vertical-align: middle !important;
+  line-height: 1 !important;
+  gap: 1px !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  background: none !important;
+  box-shadow: none !important;
+}
+yt-live-chat-gift-membership-entry-point-renderer #author-name {
+  font-size: var(--chat-font-size-message) !important;
+}
+yt-live-chat-gift-membership-entry-point-renderer #primary-text {
+  filter: none !important;
+  text-shadow: none !important;
+  white-space: nowrap !important;
+  font-size: var(--chat-font-size-message) !important;
+}
+
+/* === ANIMATIONS === */
+@keyframes slidein {
+  0% { left: 32px; }
+  100% { left: 0; }
+}
+@keyframes fadein {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+yt-live-chat-text-message-renderer #menu {
+  display: none !important;
+}`;
+    }
+
+    // ========================================
+    // DEFAULT CHAT HTML
+    // ========================================
+    const DEFAULT_CHAT_HTML = `<!-- Viewer -->
+<yt-live-chat-text-message-renderer class="style-scope yt-live-chat-item-list-renderer" author-type="">
+  <yt-img-shadow id="author-photo" class="no-transition" height="24" width="24" loaded>
+    <img draggable="false" src="https://ui-avatars.com/api/?name=Alex+K&background=3b82f6&color=fff&size=24" width="24" height="24">
+  </yt-img-shadow>
+  <div id="content">
+    <yt-live-chat-author-chip>
+      <span id="author-name">Alex Kimura</span>
+    </yt-live-chat-author-chip>
+    <span id="message">Hello everyone! Great stream today!</span>
+  </div>
+</yt-live-chat-text-message-renderer>
+
+<!-- Moderator -->
+<yt-live-chat-text-message-renderer class="style-scope yt-live-chat-item-list-renderer" author-type="moderator">
+  <yt-img-shadow id="author-photo" class="no-transition" height="24" width="24" loaded>
+    <img draggable="false" src="https://ui-avatars.com/api/?name=Mod&background=a855f7&color=fff&size=24" width="24" height="24">
+  </yt-img-shadow>
+  <div id="content">
+    <yt-live-chat-author-chip>
+      <span id="author-name" class="moderator">Moderator Chat</span>
+      <yt-live-chat-author-badge-renderer type="moderator">
+        <svg viewBox="0 0 16 16" width="14" height="14"><path d="M9.64589146,7.05569719 C9.83346524,6.562372 9.93617022,6.02722257 9.93617022,5.46808511 C9.93617022,3.00042984 7.93574038,1 5.46808511,1 C4.90894765,1 4.37379823,1.10270499 3.88047304,1.29027875 L6.95744681,4.36725249 L4.36725255,6.95744681 L1.29027875,3.88047305 C1.10270498,4.37379824 1,4.90894766 1,5.46808511 C1,7.93574038 3.00042984,9.93617022 5.46808511,9.93617022 C6.02722256,9.93617022 6.56237198,9.83346524 7.05569716,9.64589147 L12.4098057,15 L15,12.4098057 L9.64589146,7.05569719 Z" fill="currentColor"/></svg>
+      </yt-live-chat-author-badge-renderer>
+    </yt-live-chat-author-chip>
+    <span id="message">Welcome! Keep it friendly :)</span>
+  </div>
+</yt-live-chat-text-message-renderer>
+
+<!-- Member -->
+<yt-live-chat-text-message-renderer class="style-scope yt-live-chat-item-list-renderer" author-type="member">
+  <yt-img-shadow id="author-photo" class="no-transition" height="24" width="24" loaded>
+    <img draggable="false" src="https://ui-avatars.com/api/?name=Sakura&background=22c55e&color=fff&size=24" width="24" height="24">
+  </yt-img-shadow>
+  <div id="content">
+    <yt-live-chat-author-chip>
+      <span id="author-name" class="member">Sakura Chan</span>
+      <yt-live-chat-author-badge-renderer type="member">
+        <img src="https://yt3.ggpht.com/epyL4tGTEO_XyVw8KleVzYbfZ8_ycIKzKmoue4FN7K8LaSmHms-peq9Er6wHzHnZndKRMjP=s16-c-k-c0x00ffffff-no-rj" alt="M">
+      </yt-live-chat-author-badge-renderer>
+    </yt-live-chat-author-chip>
+    <span id="message">Love the content, keep it up!</span>
+  </div>
+</yt-live-chat-text-message-renderer>
+
+<!-- Owner -->
+<yt-live-chat-text-message-renderer class="style-scope yt-live-chat-item-list-renderer" author-type="owner" author-is-owner="">
+  <yt-img-shadow id="author-photo" class="no-transition" height="24" width="24" loaded>
+    <img draggable="false" src="https://ui-avatars.com/api/?name=Streamer&background=ef4444&color=fff&size=24" width="24" height="24">
+  </yt-img-shadow>
+  <div id="content">
+    <yt-live-chat-author-chip is-highlighted="">
+      <span id="author-name" class="owner">The Streamer</span>
+    </yt-live-chat-author-chip>
+    <span id="message">Thanks for watching! More streams soon</span>
+  </div>
+</yt-live-chat-text-message-renderer>
+
+<!-- Viewer 2 -->
+<yt-live-chat-text-message-renderer class="style-scope yt-live-chat-item-list-renderer" author-type="">
+  <yt-img-shadow id="author-photo" class="no-transition" height="24" width="24" loaded>
+    <img draggable="false" src="https://ui-avatars.com/api/?name=Ryo+T&background=f59e0b&color=fff&size=24" width="24" height="24">
+  </yt-img-shadow>
+  <div id="content">
+    <yt-live-chat-author-chip>
+      <span id="author-name">Ryo Tanaka</span>
+    </yt-live-chat-author-chip>
+    <span id="message">This layout is so clean!</span>
+  </div>
+</yt-live-chat-text-message-renderer>
+
+<!-- Super Chat -->
+<yt-live-chat-paid-message-renderer class="style-scope yt-live-chat-item-list-renderer" is-v2-style="" allow-animations=""
+  style="--yt-live-chat-paid-message-primary-color:rgba(245,124,0,1);--yt-live-chat-paid-message-secondary-color:rgba(230,81,0,1);--yt-live-chat-paid-message-header-color:rgba(255,255,255,0.87);--yt-live-chat-paid-message-color:rgba(255,255,255,0.87);">
+  <div id="card">
+    <yt-img-shadow id="author-photo" class="no-transition" loaded>
+      <img draggable="false" src="https://ui-avatars.com/api/?name=SC&background=f97316&color=fff&size=32" width="32" height="32">
+    </yt-img-shadow>
+    <div id="header">
+      <div id="header-content">
+        <div id="header-content-primary-column">
+          <div id="single-line">
+            <yt-live-chat-author-chip>
+              <span id="author-name">Generous Supporter</span>
+            </yt-live-chat-author-chip>
+            <span id="purchase-amount">$20.00</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="content">
+      <span id="message">Super chat! Amazing work!</span>
+    </div>
+  </div>
+</yt-live-chat-paid-message-renderer>
+
+<!-- Super Sticker -->
+<yt-live-chat-paid-sticker-renderer class="style-scope yt-live-chat-item-list-renderer" is-v2-style=""
+  style="--yt-live-chat-paid-sticker-chip-background-color:rgba(255,202,40,1);--yt-live-chat-paid-sticker-chip-text-color:rgba(0,0,0,0.87);--yt-live-chat-paid-sticker-background-color:rgba(255,202,40,1);">
+  <div id="card">
+    <yt-img-shadow id="author-photo" class="no-transition" loaded>
+      <img draggable="false" src="https://ui-avatars.com/api/?name=SF&background=eab308&color=fff&size=32" width="32" height="32">
+    </yt-img-shadow>
+    <div id="content">
+      <div id="content-primary-column">
+        <div id="author-name-chip">
+          <yt-live-chat-author-chip disable-highlighting="" single-line="">
+            <span id="author-name">Sticker Fan</span>
+          </yt-live-chat-author-chip>
+        </div>
+        <span id="purchase-amount-chip">$5.00</span>
+      </div>
+      <div id="sticker-container">
+        <img src="https://yt3.ggpht.com/Vyb2n9I6T4M7BnjQCbRCDQ0f_uCP0mNBzK3aiyzm18uKoKqEz13mG0kPdlAat2NnN2-3glsZ7w=s48-c-k-c0x00ffffff-no-rj" alt="sticker">
+      </div>
+    </div>
+  </div>
+</yt-live-chat-paid-sticker-renderer>
+
+<!-- Gift -->
+<ytd-sponsorships-live-chat-gift-purchase-announcement-renderer class="style-scope yt-live-chat-item-list-renderer">
+  <ytd-sponsorships-live-chat-header-renderer id="header">
+    <div id="header">
+      <div id="content">
+        <yt-img-shadow id="author-photo" height="40" width="40" class="no-transition" loaded>
+          <img draggable="false" src="https://ui-avatars.com/api/?name=Gift&background=10b981&color=fff&size=40" width="40" height="40">
+        </yt-img-shadow>
+        <div id="header-content">
+          <yt-live-chat-author-chip single-line="">
+            <span id="author-name" class="member single-line">Gift Giver</span>
+          </yt-live-chat-author-chip>
+          <span id="primary-text">gifted 5 memberships</span>
+        </div>
+      </div>
+    </div>
+  </ytd-sponsorships-live-chat-header-renderer>
+</ytd-sponsorships-live-chat-gift-purchase-announcement-renderer>
+
+<!-- Membership Join -->
+<yt-live-chat-membership-item-renderer class="style-scope yt-live-chat-item-list-renderer" has-primary-header-text="">
+  <div id="card">
+    <yt-img-shadow id="author-photo" height="24" width="24" class="no-transition" loaded>
+      <img draggable="false" src="https://ui-avatars.com/api/?name=NM&background=06b6d4&color=fff&size=24" width="24" height="24">
+    </yt-img-shadow>
+    <div id="header-content">
+      <div id="header-content-inner-column">
+        <yt-live-chat-author-chip>
+          <span id="author-name" class="member">New Member</span>
+          <yt-live-chat-author-badge-renderer type="member">
+            <img src="https://yt3.ggpht.com/epyL4tGTEO_XyVw8KleVzYbfZ8_ycIKzKmoue4FN7K8LaSmHms-peq9Er6wHzHnZndKRMjP=s16-c-k-c0x00ffffff-no-rj" alt="M">
+          </yt-live-chat-author-badge-renderer>
+        </yt-live-chat-author-chip>
+        <span id="header-primary-text">just became a member</span>
+      </div>
+    </div>
+  </div>
+</yt-live-chat-membership-item-renderer>`;
+
+    // ========================================
+    // DOM REFS
+    // ========================================
+    const cssEditor = document.getElementById('css-editor');
+    const htmlEditor = document.getElementById('html-editor');
+    const liveCss = document.getElementById('live-css');
+    const chatPreview = document.getElementById('chat-preview');
+    const previewBg = document.getElementById('preview-bg');
+    const bgToggle = document.getElementById('bg-toggle');
+    const zoomSelect = document.getElementById('zoom-select');
+    const toast = document.getElementById('toast');
+    const lineCount = document.getElementById('line-count');
+    const charCount = document.getElementById('char-count');
+
+    // ========================================
+    // CONFIG STATE
+    // ========================================
+    const defaultCfg = {
+      fontName: '',
+      fontMsg: '',
+      weightName: '700',
+      weightMsg: '400',
+      sizeName: 18,
+      sizeNameCard: 18,
+      sizeMsg: 22,
+      avatarSize: 24,
+      clrName: '#9a8484',
+      clrNameMod: '#5541da',
+      clrNameMem: '#41da93',
+      clrNameOwn: '#dd5050',
+      clrMsg: '#ffffff',
+      clrMsgMod: '#ffffff',
+      clrMsgMem: '#ffffff',
+      clrMsgOwn: '#ffffff',
+      outlineEnabled: true,
+      outlineColor: '#000000',
+      glowColor: '#000000',
+      glowOpacity: 0,
+      radius: 12,
+      chatBg: '#000000',
+      hideBadges: true,
+      showTimestamps: false,
+      timestampColor: '#999999',
+      showAvatars: true,
+      letterSpacing: 0,
+      msgSpacing: 3,
+      msgBgColor: '#000000',
+      msgBgOpacity: 0,
+      ownerBgColor: '#ffd600',
+      ownerBgOpacity: 0,
+      modBgColor: '#5e84f1',
+      modBgOpacity: 0,
+      memberBgColor: '#0f9d58',
+      memberBgOpacity: 0,
+    };
+    const savedCfg = localStorage.getItem('hchat-config');
+    const cfg = savedCfg ? Object.assign({}, defaultCfg, JSON.parse(savedCfg)) : Object.assign({}, defaultCfg);
+    function saveConfig() {
+      localStorage.setItem('hchat-config', JSON.stringify(cfg));
+    }
+
+    // ========================================
+    // INITIALIZE
+    // ========================================
+    function init() {
+      // Set GUI defaults
+      document.getElementById('gui-font-name').value = cfg.fontName;
+      document.getElementById('gui-font-msg').value = cfg.fontMsg;
+      document.getElementById('gui-weight-name').value = cfg.weightName;
+      document.getElementById('gui-weight-msg').value = cfg.weightMsg;
+      document.getElementById('gui-size-name').value = cfg.sizeName;
+      document.getElementById('gui-size-msg').value = cfg.sizeMsg;
+      document.getElementById('gui-size-name-card').value = cfg.sizeNameCard;
+      document.getElementById('gui-glow-opacity').value = cfg.glowOpacity;
+      document.getElementById('gui-radius').value = cfg.radius;
+      document.getElementById('gui-avatar-size').value = cfg.avatarSize;
+      document.getElementById('gui-msg-spacing').value = cfg.msgSpacing;
+
+      document.getElementById('val-size-name').textContent = cfg.sizeName + 'px';
+      document.getElementById('val-size-msg').textContent = cfg.sizeMsg + 'px';
+      document.getElementById('val-size-name-card').textContent = cfg.sizeNameCard + 'px';
+      document.getElementById('val-glow-opacity').textContent = cfg.glowOpacity + '%';
+      document.getElementById('val-radius').textContent = cfg.radius + 'px';
+      document.getElementById('val-avatar-size').textContent = cfg.avatarSize + 'px';
+      document.getElementById('val-msg-spacing').textContent = cfg.msgSpacing + 'px';
+
+      document.getElementById('clr-name').value = cfg.clrName;
+      document.getElementById('clr-name-mod').value = cfg.clrNameMod;
+      document.getElementById('clr-name-mem').value = cfg.clrNameMem;
+      document.getElementById('clr-name-own').value = cfg.clrNameOwn;
+      document.getElementById('clr-msg').value = cfg.clrMsg;
+      document.getElementById('clr-msg-mod').value = cfg.clrMsgMod;
+      document.getElementById('clr-msg-mem').value = cfg.clrMsgMem;
+      document.getElementById('clr-msg-own').value = cfg.clrMsgOwn;
+      document.getElementById('clr-outline').value = cfg.outlineColor;
+      document.getElementById('clr-glow').value = cfg.glowColor;
+      document.getElementById('clr-chat-bg').value = cfg.chatBg;
+
+      // Timestamp & text options
+      document.getElementById('gui-show-timestamps').classList.toggle('on', cfg.showTimestamps);
+      document.getElementById('clr-timestamp').value = cfg.timestampColor;
+      document.getElementById('gui-show-avatars').classList.toggle('on', cfg.showAvatars);
+      document.getElementById('gui-letter-spacing').value = cfg.letterSpacing;
+      document.getElementById('val-letter-spacing').textContent = cfg.letterSpacing + 'px';
+
+      // Message backgrounds
+      document.getElementById('clr-msg-bg').value = cfg.msgBgColor;
+      document.getElementById('gui-msg-bg-opacity').value = cfg.msgBgOpacity;
+      document.getElementById('val-msg-bg-opacity').textContent = cfg.msgBgOpacity + '%';
+      document.getElementById('clr-owner-bg').value = cfg.ownerBgColor;
+      document.getElementById('gui-owner-bg-opacity').value = cfg.ownerBgOpacity;
+      document.getElementById('val-owner-bg-opacity').textContent = cfg.ownerBgOpacity + '%';
+      document.getElementById('clr-mod-bg').value = cfg.modBgColor;
+      document.getElementById('gui-mod-bg-opacity').value = cfg.modBgOpacity;
+      document.getElementById('val-mod-bg-opacity').textContent = cfg.modBgOpacity + '%';
+      document.getElementById('clr-member-bg').value = cfg.memberBgColor;
+      document.getElementById('gui-member-bg-opacity').value = cfg.memberBgOpacity;
+      document.getElementById('val-member-bg-opacity').textContent = cfg.memberBgOpacity + '%';
+
+      // Reset toggle states
+      const outlineToggle = document.getElementById('gui-outline-toggle');
+      cfg.outlineEnabled ? outlineToggle.classList.add('on') : outlineToggle.classList.remove('on');
+      const badgesToggle = document.getElementById('gui-hide-badges');
+      cfg.hideBadges ? badgesToggle.classList.add('on') : badgesToggle.classList.remove('on');
+
+      // Load saved HTML or default
+      const savedHTML = localStorage.getItem('hchat-html');
+      htmlEditor.value = savedHTML || DEFAULT_CHAT_HTML;
+      chatPreview.innerHTML = '';
+
+      // Apply CSS on init
+      var css = generateCSS(cfg);
+      cssEditor.value = css;
+      liveCss.textContent = css;
+      updateCounts();
+    }
+
+    function updateCSS() {
+      saveConfig();
+      var css = generateCSS(cfg);
+      cssEditor.value = css;
+      liveCss.textContent = css;
+      updateCounts();
+    }
+
+    function updateCounts() {
+      const lines = cssEditor.value.split('\n').length;
+      const chars = cssEditor.value.length;
+      lineCount.textContent = lines + ' lines';
+      charCount.textContent = chars + ' chars';
+    }
+
+    // ========================================
+    // GUI EVENT LISTENERS
+    // ========================================
+
+    // Selects
+    ['gui-font-name', 'gui-font-msg', 'gui-weight-name', 'gui-weight-msg'].forEach(id => {
+      document.getElementById(id).addEventListener('change', (e) => {
+        const map = {
+          'gui-font-name': 'fontName',
+          'gui-font-msg': 'fontMsg',
+          'gui-weight-name': 'weightName',
+          'gui-weight-msg': 'weightMsg',
+        };
+        cfg[map[id]] = e.target.value;
+        updateCSS();
+      });
+    });
+
+    // Ranges
+    ['gui-size-name', 'gui-size-msg', 'gui-size-name-card', 'gui-glow-opacity', 'gui-radius', 'gui-avatar-size', 'gui-letter-spacing', 'gui-msg-spacing', 'gui-msg-bg-opacity', 'gui-owner-bg-opacity', 'gui-mod-bg-opacity', 'gui-member-bg-opacity'].forEach(id => {
+      document.getElementById(id).addEventListener('input', (e) => {
+        const map = {
+          'gui-size-name': { key: 'sizeName', suffix: 'px', valId: 'val-size-name' },
+          'gui-size-msg': { key: 'sizeMsg', suffix: 'px', valId: 'val-size-msg' },
+          'gui-size-name-card': { key: 'sizeNameCard', suffix: 'px', valId: 'val-size-name-card' },
+          'gui-glow-opacity': { key: 'glowOpacity', suffix: '%', valId: 'val-glow-opacity' },
+          'gui-radius': { key: 'radius', suffix: 'px', valId: 'val-radius' },
+          'gui-avatar-size': { key: 'avatarSize', suffix: 'px', valId: 'val-avatar-size' },
+          'gui-letter-spacing': { key: 'letterSpacing', suffix: 'px', valId: 'val-letter-spacing' },
+          'gui-msg-spacing': { key: 'msgSpacing', suffix: 'px', valId: 'val-msg-spacing' },
+          'gui-msg-bg-opacity': { key: 'msgBgOpacity', suffix: '%', valId: 'val-msg-bg-opacity' },
+          'gui-owner-bg-opacity': { key: 'ownerBgOpacity', suffix: '%', valId: 'val-owner-bg-opacity' },
+          'gui-mod-bg-opacity': { key: 'modBgOpacity', suffix: '%', valId: 'val-mod-bg-opacity' },
+          'gui-member-bg-opacity': { key: 'memberBgOpacity', suffix: '%', valId: 'val-member-bg-opacity' },
+        };
+        const m = map[id];
+        cfg[m.key] = parseInt(e.target.value);
+        document.getElementById(m.valId).textContent = e.target.value + m.suffix;
+        updateCSS();
+      });
+    });
+
+    // Colors
+    ['clr-name', 'clr-name-mod', 'clr-name-mem', 'clr-name-own', 'clr-msg', 'clr-msg-mod', 'clr-msg-mem', 'clr-msg-own', 'clr-outline', 'clr-glow', 'clr-chat-bg', 'clr-timestamp', 'clr-msg-bg', 'clr-owner-bg', 'clr-mod-bg', 'clr-member-bg'].forEach(id => {
+      document.getElementById(id).addEventListener('input', (e) => {
+        const map = {
+          'clr-name': 'clrName',
+          'clr-name-mod': 'clrNameMod',
+          'clr-name-mem': 'clrNameMem',
+          'clr-name-own': 'clrNameOwn',
+          'clr-msg': 'clrMsg',
+          'clr-msg-mod': 'clrMsgMod',
+          'clr-msg-mem': 'clrMsgMem',
+          'clr-msg-own': 'clrMsgOwn',
+          'clr-outline': 'outlineColor',
+          'clr-glow': 'glowColor',
+          'clr-chat-bg': 'chatBg',
+          'clr-timestamp': 'timestampColor',
+          'clr-msg-bg': 'msgBgColor',
+          'clr-owner-bg': 'ownerBgColor',
+          'clr-mod-bg': 'modBgColor',
+          'clr-member-bg': 'memberBgColor',
+        };
+        cfg[map[id]] = e.target.value;
+        updateCSS();
+      });
+    });
+
+    // Outline toggle
+    document.getElementById('gui-outline-toggle').addEventListener('click', function() {
+      this.classList.toggle('on');
+      cfg.outlineEnabled = this.classList.contains('on');
+      updateCSS();
+    });
+
+    // Hide badges toggle
+    document.getElementById('gui-hide-badges').addEventListener('click', function() {
+      this.classList.toggle('on');
+      cfg.hideBadges = this.classList.contains('on');
+      updateCSS();
+    });
+
+    // Show timestamps toggle
+    document.getElementById('gui-show-timestamps').addEventListener('click', function() {
+      this.classList.toggle('on');
+      cfg.showTimestamps = this.classList.contains('on');
+      updateCSS();
+    });
+
+    // Show avatars toggle
+    document.getElementById('gui-show-avatars').addEventListener('click', function() {
+      this.classList.toggle('on');
+      cfg.showAvatars = this.classList.contains('on');
+      updateCSS();
+    });
+
+    // ========================================
+    // CODE EDITORS LIVE SYNC
+    // ========================================
+    let cssTimer;
+    cssEditor.addEventListener('input', () => {
+      clearTimeout(cssTimer);
+      cssTimer = setTimeout(() => {
+        liveCss.textContent = cssEditor.value;
+        updateCounts();
+      }, 150);
+    });
+
+    let htmlTimer;
+    htmlEditor.addEventListener('input', () => {
+      clearTimeout(htmlTimer);
+      htmlTimer = setTimeout(() => {
+        chatPreview.innerHTML = htmlEditor.value;
+        localStorage.setItem('hchat-html', htmlEditor.value);
+      }, 200);
+    });
+
+    // ========================================
+    // TABS
+    // ========================================
+    document.querySelectorAll('.panel-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.panel-tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.panel-pane').forEach(p => p.classList.remove('active'));
+        tab.classList.add('active');
+        document.getElementById('pane-' + tab.dataset.tab).classList.add('active');
+      });
+    });
+
+    // ========================================
+    // PREVIEW BUTTONS - Add chat messages
+    // ========================================
+    var _chatNames = ['Alex','Sakura','Ryo','Yuki','Hana','Ken','Nami','Kai','Luna','Sora','Mio','Taro','Rei','Jin','Aoi'];
+    var _chatMsgs = ['Hello!','Nice stream!','Love it!','GG!','So cool!','Wow!','Amazing!','Hype!','Let\'s go!','Awesome!','Poggers','Content!','Based','W stream','First time here'];
+    function _rand(arr) { return arr[Math.floor(Math.random()*arr.length)]; }
+    function _randInt(n) { return Math.floor(Math.random()*n); }
+    function _makeAvatar(name, bg) {
+      return 'https://ui-avatars.com/api/?name='+encodeURIComponent(name)+'&background='+bg+'&color=fff&size=24';
+    }
+
+    var chatTemplates = {
+      viewer: function() {
+        var name = _rand(_chatNames);
+        return '<yt-live-chat-text-message-renderer class="style-scope yt-live-chat-item-list-renderer" author-type="">'
+          + '<yt-img-shadow id="author-photo" class="no-transition" height="24" width="24" loaded>'
+          + '<img draggable="false" src="'+_makeAvatar(name,'3b82f6')+'" width="24" height="24">'
+          + '</yt-img-shadow>'
+          + '<div id="content">'
+          + '<yt-live-chat-author-chip>'
+          + '<span id="author-name">'+name+'</span>'
+          + '</yt-live-chat-author-chip>'
+          + '<span id="message">'+_rand(_chatMsgs)+'</span>'
+          + '</div>'
+          + '</yt-live-chat-text-message-renderer>';
+      },
+      mod: function() {
+        var name = 'Mod '+_rand(_chatNames);
+        return '<yt-live-chat-text-message-renderer class="style-scope yt-live-chat-item-list-renderer" author-type="moderator">'
+          + '<yt-img-shadow id="author-photo" class="no-transition" height="24" width="24" loaded>'
+          + '<img draggable="false" src="'+_makeAvatar(name,'a855f7')+'" width="24" height="24">'
+          + '</yt-img-shadow>'
+          + '<div id="content">'
+          + '<yt-live-chat-author-chip>'
+          + '<span id="author-name" class="moderator">'+name+'</span>'
+          + '<yt-live-chat-author-badge-renderer type="moderator">'
+          + '<svg viewBox="0 0 16 16" width="14" height="14"><path d="M9.64589146,7.05569719 C9.83346524,6.562372 9.93617022,6.02722257 9.93617022,5.46808511 C9.93617022,3.00042984 7.93574038,1 5.46808511,1 C4.90894765,1 4.37379823,1.10270499 3.88047304,1.29027875 L6.95744681,4.36725249 L4.36725255,6.95744681 L1.29027875,3.88047305 C1.10270498,4.37379824 1,4.90894766 1,5.46808511 C1,7.93574038 3.00042984,9.93617022 5.46808511,9.93617022 C6.02722256,9.93617022 6.56237198,9.83346524 7.05569716,9.64589147 L12.4098057,15 L15,12.4098057 L9.64589146,7.05569719 Z" fill="currentColor"/></svg>'
+          + '</yt-live-chat-author-badge-renderer>'
+          + '</yt-live-chat-author-chip>'
+          + '<span id="message">'+_rand(_chatMsgs)+'</span>'
+          + '</div>'
+          + '</yt-live-chat-text-message-renderer>';
+      },
+      member: function() {
+        var name = _rand(_chatNames);
+        return '<yt-live-chat-text-message-renderer class="style-scope yt-live-chat-item-list-renderer" author-type="member">'
+          + '<yt-img-shadow id="author-photo" class="no-transition" height="24" width="24" loaded>'
+          + '<img draggable="false" src="'+_makeAvatar(name,'22c55e')+'" width="24" height="24">'
+          + '</yt-img-shadow>'
+          + '<div id="content">'
+          + '<yt-live-chat-author-chip>'
+          + '<span id="author-name" class="member">'+name+'</span>'
+          + '<yt-live-chat-author-badge-renderer type="member">'
+          + '<img src="https://yt3.ggpht.com/epyL4tGTEO_XyVw8KleVzYbfZ8_ycIKzKmoue4FN7K8LaSmHms-peq9Er6wHzHnZndKRMjP=s16-c-k-c0x00ffffff-no-rj" alt="M">'
+          + '</yt-live-chat-author-badge-renderer>'
+          + '</yt-live-chat-author-chip>'
+          + '<span id="message">'+_rand(_chatMsgs)+'</span>'
+          + '</div>'
+          + '</yt-live-chat-text-message-renderer>';
+      },
+      owner: function() {
+        var name = 'The Streamer';
+        return '<yt-live-chat-text-message-renderer class="style-scope yt-live-chat-item-list-renderer" author-type="owner" author-is-owner="">'
+          + '<yt-img-shadow id="author-photo" class="no-transition" height="24" width="24" loaded>'
+          + '<img draggable="false" src="'+_makeAvatar(name,'ef4444')+'" width="24" height="24">'
+          + '</yt-img-shadow>'
+          + '<div id="content">'
+          + '<yt-live-chat-author-chip is-highlighted="">'
+          + '<span id="author-name" class="owner">'+name+'</span>'
+          + '</yt-live-chat-author-chip>'
+          + '<span id="message">'+_rand(_chatMsgs)+'</span>'
+          + '</div>'
+          + '</yt-live-chat-text-message-renderer>';
+      },
+      superchat: function() {
+        var name = _rand(_chatNames);
+        var amounts = ['$1.00','$2.00','$5.00','$10.00','$20.00','$50.00','$100.00'];
+        var colors = ['#f97316','#f59e0b','#ef4444','#ec4899','#a855f7','#6366f1'];
+        var c = _rand(colors);
+        return '<yt-live-chat-paid-message-renderer class="style-scope yt-live-chat-item-list-renderer" is-v2-style="" allow-animations=""'
+          + ' style="--yt-live-chat-paid-message-primary-color:'+c+';--yt-live-chat-paid-message-secondary-color:'+c+';--yt-live-chat-paid-message-header-color:rgba(255,255,255,0.87);--yt-live-chat-paid-message-color:rgba(255,255,255,0.87);">'
+          + '<div id="card">'
+          + '<yt-img-shadow id="author-photo" class="no-transition" loaded>'
+          + '<img draggable="false" src="'+_makeAvatar(name,'f97316')+'" width="32" height="32">'
+          + '</yt-img-shadow>'
+          + '<div id="header">'
+          + '<div id="header-content">'
+          + '<div id="header-content-primary-column">'
+          + '<div id="single-line">'
+          + '<yt-live-chat-author-chip>'
+          + '<span id="author-name">'+name+'</span>'
+          + '</yt-live-chat-author-chip>'
+          + '<span id="purchase-amount">'+_rand(amounts)+'</span>'
+          + '</div>'
+          + '</div>'
+          + '</div>'
+          + '</div>'
+          + '<div id="content">'
+          + '<span id="message">'+_rand(_chatMsgs)+'</span>'
+          + '</div>'
+          + '</div>'
+          + '</yt-live-chat-paid-message-renderer>';
+      },
+      gift: function() {
+        var name = _rand(_chatNames);
+        var count = [1,2,3,5,10][_randInt(5)];
+        return '<ytd-sponsorships-live-chat-gift-purchase-announcement-renderer class="style-scope yt-live-chat-item-list-renderer">'
+          + '<ytd-sponsorships-live-chat-header-renderer id="header">'
+          + '<div id="header">'
+          + '<div id="content">'
+          + '<yt-img-shadow id="author-photo" height="40" width="40" class="no-transition" loaded>'
+          + '<img draggable="false" src="'+_makeAvatar(name,'10b981')+'" width="40" height="40">'
+          + '</yt-img-shadow>'
+          + '<div id="header-content">'
+          + '<yt-live-chat-author-chip single-line="">'
+          + '<span id="author-name" class="member single-line">'+name+'</span>'
+          + '</yt-live-chat-author-chip>'
+          + '<span id="primary-text">gifted '+count+' membership'+(count>1?'s':'')+'</span>'
+          + '</div>'
+          + '</div>'
+          + '</div>'
+          + '</ytd-sponsorships-live-chat-header-renderer>'
+          + '</ytd-sponsorships-live-chat-gift-purchase-announcement-renderer>';
+      },
+      membership: function() {
+        var name = _rand(_chatNames);
+        var tiers = ['Member','Silver','Gold','Diamond'];
+        return '<yt-live-chat-membership-item-renderer class="style-scope yt-live-chat-item-list-renderer" has-primary-header-text="">'
+          + '<div id="card">'
+          + '<yt-img-shadow id="author-photo" height="24" width="24" class="no-transition" loaded>'
+          + '<img draggable="false" src="'+_makeAvatar(name,'06b6d4')+'" width="24" height="24">'
+          + '</yt-img-shadow>'
+          + '<div id="header-content">'
+          + '<div id="header-content-inner-column">'
+          + '<yt-live-chat-author-chip>'
+          + '<span id="author-name" class="member">'+name+'</span>'
+          + '<yt-live-chat-author-badge-renderer type="member">'
+          + '<img src="https://yt3.ggpht.com/epyL4tGTEO_XyVw8KleVzYbfZ8_ycIKzKmoue4FN7K8LaSmHms-peq9Er6wHzHnZndKRMjP=s16-c-k-c0x00ffffff-no-rj" alt="M">'
+          + '</yt-live-chat-author-badge-renderer>'
+          + '</yt-live-chat-author-chip>'
+          + '<span id="header-primary-text">just became a '+_rand(tiers)+'</span>'
+          + '</div>'
+          + '</div>'
+          + '</div>'
+          + '</yt-live-chat-membership-item-renderer>';
+      }
+    };
+
+    document.querySelectorAll('#preview-btns .preview-btn[data-type]').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        var type = this.dataset.type;
+        if (chatTemplates[type]) {
+          chatPreview.insertAdjacentHTML('afterbegin', chatTemplates[type]());
+        }
+      });
+    });
+    document.getElementById('btn-clear-preview').addEventListener('click', function() {
+      chatPreview.innerHTML = '';
+    });
+
+    // ========================================
+    // BG TOGGLE
+    // ========================================
+    bgToggle.addEventListener('click', () => {
+      bgToggle.classList.toggle('on');
+      previewBg.classList.toggle('light');
+    });
+
+    // ========================================
+    // ZOOM
+    // ========================================
+    zoomSelect.addEventListener('change', () => {
+      chatPreview.style.transform = `scale(${zoomSelect.value})`;
+      chatPreview.style.transformOrigin = 'left bottom';
+    });
+
+    // ========================================
+    // COPY
+    // ========================================
+    document.getElementById('btn-copy').addEventListener('click', function() {
+      var text = cssEditor.value;
+      var btn = this;
+      btn.style.pointerEvents = 'none';
+
+      var tmp = document.createElement('textarea');
+      tmp.value = text;
+      tmp.style.cssText = 'position:fixed;top:50%;left:50%;opacity:0;width:1px;height:1px;';
+      document.body.appendChild(tmp);
+      tmp.focus();
+      tmp.select();
+
+      var ok = false;
+      try { ok = document.execCommand('copy'); } catch(e) {}
+
+      document.body.removeChild(tmp);
+      btn.style.pointerEvents = '';
+
+      if (ok) {
+        document.getElementById('copy-modal').classList.add('show');
+      } else {
+        window.prompt('Copy manually (Ctrl+C):', text);
+      }
+    });
+
+    document.getElementById('copy-modal-close').addEventListener('click', function() {
+      document.getElementById('copy-modal').classList.remove('show');
+    });
+    document.getElementById('copy-modal').addEventListener('click', function(e) {
+      if (e.target === this) this.classList.remove('show');
+    });
+
+    // ========================================
+    // EXPORT
+    // ========================================
+    document.getElementById('btn-export').addEventListener('click', () => {
+      const blob = new Blob([cssEditor.value], { type: 'text/css' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'horizontal-chat.css';
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+
+    // ========================================
+    // RESET
+    // ========================================
+    document.getElementById('btn-reset').addEventListener('click', () => {
+      Object.assign(cfg, {
+        fontName: '', fontMsg: '', weightName: '700', weightMsg: '400',
+        sizeName: 18, sizeMsg: 22, avatarSize: 24,
+        clrName: '#9a8484', clrNameMod: '#5541da',
+        clrNameMem: '#41da93', clrNameOwn: '#dd5050',
+        clrMsg: '#ffffff', clrMsgMod: '#ffffff', clrMsgMem: '#ffffff', clrMsgOwn: '#ffffff',
+        outlineEnabled: true, outlineColor: '#000000',
+        glowColor: '#000000', glowOpacity: 0, radius: 12, chatBg: '#000000', hideBadges: true,
+        showTimestamps: false, timestampColor: '#999999', showAvatars: true, letterSpacing: 0, msgSpacing: 3,
+        msgBgColor: '#000000', msgBgOpacity: 0, ownerBgColor: '#ffd600', ownerBgOpacity: 0,
+        modBgColor: '#5e84f1', modBgOpacity: 0, memberBgColor: '#0f9d58', memberBgOpacity: 0,
+      });
+      init();
+    });
+
+    // ========================================
+    // RESIZER
+    // ========================================
+    const resizer = document.getElementById('resizer');
+    const leftPanel = document.getElementById('left-panel');
+    let isResizing = false;
+
+    resizer.addEventListener('mousedown', (e) => {
+      isResizing = true;
+      resizer.classList.add('active');
+      document.body.style.cursor = 'col-resize';
+      document.body.style.userSelect = 'none';
+    });
+    document.addEventListener('mousemove', (e) => {
+      if (!isResizing) return;
+      leftPanel.style.width = Math.max(320, Math.min(700, e.clientX)) + 'px';
+    });
+    document.addEventListener('mouseup', () => {
+      isResizing = false;
+      resizer.classList.remove('active');
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+    });
+
+    // ========================================
+    // TAB KEY IN TEXTAREA
+    // ========================================
+    [cssEditor, htmlEditor].forEach(el => {
+      el.addEventListener('keydown', (e) => {
+        if (e.key === 'Tab') {
+          e.preventDefault();
+          const s = el.selectionStart, end = el.selectionEnd;
+          el.value = el.value.substring(0, s) + '  ' + el.value.substring(end);
+          el.selectionStart = el.selectionEnd = s + 2;
+          if (el === cssEditor) liveCss.textContent = el.value;
+          if (el === htmlEditor) chatPreview.innerHTML = el.value;
+        }
+      });
+    });
+
+    // ========================================
+    // START
+    // ========================================
+    init();
+  </script>
+</body>
+</html>

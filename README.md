@@ -68,7 +68,7 @@ Based on YouTube's official color scheme:
    ```
    https://www.youtube.com/live_chat?is_popout=1&v=YOUR_VIDEO_ID
    ```
-3. Set Width: `350`, Height: `600`
+3. Set Width: `5000`, Height: `200`
 4. Check **Shutdown source when not visible** (optional)
 5. Click **OK**
 6. Right-click the Browser Source → **Properties**

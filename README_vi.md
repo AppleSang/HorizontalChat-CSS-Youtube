@@ -2,7 +2,7 @@
 
 Trình chỉnh sửa CSS trên trình duyệt để tạo overlay chat ngang cho YouTube Live Chat. Tin nhắn chat hiển thị trên một dòng ngang với avatar, tên và nội dung nằm cùng hàng.
 
-![Preview](editor.html)
+
 
 ## Tính năng
 
@@ -68,7 +68,7 @@ Dựa trên scheme màu chính thức của YouTube:
    ```
    https://www.youtube.com/live_chat?is_popout=1&v=VIDEO_ID_CUA_BAN
    ```
-3. Đặt Width: `350`, Height: `600`
+3. Đặt Width: `5000`, Height: `200`
 4. Tích **Shutdown source when not visible** (tùy chọn)
 5. Nhấn **OK**
 6. Chuột phải vào Browser Source → **Properties**

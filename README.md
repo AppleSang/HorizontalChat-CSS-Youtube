@@ -2,7 +2,7 @@
 
 A browser-based CSS editor for creating horizontal YouTube live chat overlays. Chat messages appear in a single horizontal line with avatar, name, and message aligned side by side.
 
-![Đọc bản tiếng việt tại đây](README_vi.md)
+[Đọc bản tiếng việt tại đây](README_vi.md)
 
 ## Features
 

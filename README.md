@@ -1,8 +1,8 @@
-# Horizontal Chat Editor v2.0
+# HorizontalChat-CSS-Youtube
 
 A browser-based CSS editor for creating horizontal YouTube live chat overlays. Chat messages appear in a single horizontal line with avatar, name, and message aligned side by side.
 
-
+![Preview](editor.html)
 
 ## Features
 
@@ -69,15 +69,14 @@ Based on YouTube's official color scheme:
    https://www.youtube.com/live_chat?is_popout=1&v=YOUR_VIDEO_ID
    ```
 3. Set Width: `5000`, Height: `200`
-4. Check **Shutdown source when not visible** (optional)
-5. Click **OK**
-6. Right-click the Browser Source → **Properties**
-7. Scroll to **Custom CSS** and paste the copied CSS
-8. Click **OK**
+4. Click **OK**
+5. Right-click the Browser Source → **Properties**
+6. Scroll to **Custom CSS** and paste the copied CSS
+7. Click **OK**
 
 ## Credits
 
-- **[Zaladin5x](https://github.com/Zaladin5x)** — Base horizontal chat CSS layout
+- **[Zaladin5x](https://github.com/Zaladin5x)** — Base HorizontalChat-CSS-Youtube layout
 - **[Touru Baskara](https://ko-fi.com/s/c1037bb627)** — Editor concept & GUI design
 - **[Septapus](https://chatv2.septapus.com/)** — Chat V2 style generator (inspiration for customization features)
 - **[Reza (DekReza)](https://github.com/dekreza)** — Chat HTML data & rendering logic
